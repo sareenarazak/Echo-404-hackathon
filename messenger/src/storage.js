@@ -58,16 +58,34 @@ var storage = (function () {
         isSenderSet: function () {
             return this.data.sender != '';
         },
+        getMessages: function (session, callback) {
+
+            var userTableName = session.data.userName + 'Messages';
+            dynamodb.scan({
+                TableName: userTableName,
+                AttributesToGet: [
+                    'time',
+                    'sender',
+                    'message'
+                ]
+            }, function (err, data) {
+                if (err || data === undefined) {
+                    callback(false);
+                } else {
+                    callback(JSON.parse(data));
+                }
+            });
+        },
 
         // this should only be reached/called when the above three 
         // functions have been verified (session has sender, recip, msg)
         saveMessage: function (callback) {
-            
+
             var recipExist = doesMemberExist(this.data.recipient);
             if (recipExist && recipExist.length) {
 
                 // sender, recipient, message
-                this._session.attributes.currentMessage = this.data;
+                this._session.attributes.currentMessageSession = this.data;
 
                 var recipTable = this.data.recipient + 'Messages';
 
@@ -104,42 +122,20 @@ var storage = (function () {
             return scanResults && scanResults.length;
 
         },
-        loadMessages: function (session, callback) {
-
-            // if (session.attributes.currentGame) {
-            //     console.log('get game from session=' + session.attributes.currentGame);
-            //     callback(new Game(session, session.attributes.currentGame));
-            //     return;
-            // }
-            // dynamodb.getItem({
-            //     TableName: 'ScoreKeeperUserData',
-            //     Key: {
-            //         CustomerId: {
-            //             S: session.user.userId
-            //         }
-            //     }
-            // }, function (err, data) {
-            //     var currentGame;
-            //     if (err) {
-            //         console.log(err, err.stack);
-            //         currentGame = new Game(session);
-            //         session.attributes.currentGame = currentGame.data;
-            //         callback(currentGame);
-            //     } else if (data.Item === undefined) {
-            //         currentGame = new Game(session);
-            //         session.attributes.currentGame = currentGame.data;
-            //         callback(currentGame);
-            //     } else {
-            //         console.log('get game from dynamodb=' + data.Item.Data.S);
-            //         currentGame = new Game(session, JSON.parse(data.Item.Data.S));
-            //         session.attributes.currentGame = currentGame.data;
-            //         callback(currentGame);
-            //     }
-            // });
-        },
         newMessage: function (session) {
             return new MessengerSession(session);
         }
     };
 })();
 module.exports = storage;
+
+
+
+
+
+
+
+
+
+
+
