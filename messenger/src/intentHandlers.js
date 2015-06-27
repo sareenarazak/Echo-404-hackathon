@@ -4,14 +4,14 @@
 var textHelper = require('./textHelper'),
     storage = require('./storage');
 
-var session.userName = null;
-var session.repeatRecipient = false;
-var session.repeatMessage = false;
+var session.data.userName = null;
+var session.data.repeatRecipient = false;
+var session.data.repeatMessage = false;
 
-var registerIntentHandlers = function (intentHandlers, skillContext) {
+var registerIntentHandlers = function (intentHandlers) {
     intentHandlers.MyNameIntent = function (intent, session, response) {
-        if (session.userName) {
-            response.ask("Am I not talking to " + session.userName + " ?");
+        if (session.data.userName) {
+            response.ask("Am I not talking to " + session.data.userName + " ?");
         } else {
             userName = intent.slots.Member.value;
             if (!userName) {
@@ -42,23 +42,23 @@ var registerIntentHandlers = function (intentHandlers, skillContext) {
 
     intentHandlers.SendMessageIntent = function (intent, session, response) {
         var recipient = intent.slots.Sender.value;
-        if (!recipient && !session.repeatRecipient) {
+        if (!recipient && !session.data.repeatRecipient) {
             response.ask("Sorry, I didn\'t get that. Who would you like to deliver this message to?");
-            session.repeatRecipient = true;
+            session.data.repeatRecipient = true;
             return;
-        } else if (!recipient && session.repeatRecipient) {
-            session.repeatRecipient = false;
+        } else if (!recipient && session.data.repeatRecipient) {
+            session.data.repeatRecipient = false;
             response.tell("Please, repeat your message and whom you want to send it.");
             return;
         }
-        else if (session.repeatRecipient && session.message) {
-            session.repeatRecipient = false;
-            session.recipient = recipient;
+        else if (session.data.repeatRecipient && session.data.message) {
+            session.data.repeatRecipient = false;
+            session.data.recipient = recipient;
             storage.saveMessage(session, function (success) {
                 if(success) {
                     response.tell("Don't you worry! " + recipient + " will receive your message!");
-                    session.recipient = null;
-                    session.message = null;
+                    session.data.recipient = null;
+                    session.data.message = null;
                 } else {
                     response.tell("Please, repeat your message and whom you want to send it.");
                 }
@@ -67,26 +67,26 @@ var registerIntentHandlers = function (intentHandlers, skillContext) {
         }
 
         var message = intent.slots.Message.value;
-        if (!message && !session.repeatMessage) {
+        if (!message && !session.data.repeatMessage) {
             response.ask("Sorry, I didn\'t get that. Can you repeat your message?");
-            session.repeatMessage = true;
+            session.data.repeatMessage = true;
             return;
-        } else if (!message && session.repeatMessage) {
+        } else if (!message && session.data.repeatMessage) {
             response.tell("Please, repeat your message and whom you want to send it.");
-            session.repeatMessage = false;
+            session.data.repeatMessage = false;
             return;
         }
         else {
-            session.message = message;
-            session.recipient = recipient;
+            session.data.message = message;
+            session.data.recipient = recipient;
             storage.saveMessage(session, function (success) {
                 if(success) {
                     response.tell("Don't you worry! " + recipient + " will receive your message!");
-                    session.recipient = null;
-                    session.message = null;
+                    session.data.recipient = null;
+                    session.data.message = null;
                 } else {
                     response.tell("I can't find " + recipient + " in your echo family. Who is that again?");
-                    session.repeatRecipient = true;
+                    session.data.repeatRecipient = true;
                 }
             });
             return;
