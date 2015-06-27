@@ -29,6 +29,9 @@ AlexaSkill.prototype.eventHandlers = {
      * Subclasses could have overriden this function to open any necessary resources.
      */
     onSessionStarted: function (sessionStartedRequest, session) {
+        // Start AWS session
+        var AWS = require('aws-sdk');
+        AWS.config.update({region: 'us-east-1'});
     },
 
     /**
