@@ -1,6 +1,7 @@
 SendIntent Tell {John|Recipient} to {get a hair cut|Message}
 SendIntent Ask {Jane|Recipient} to {do your homework|Message}
 SendIntent Can you please ask {Jane|Recipient} to {have a life|Message}?
+SendIntent {Jane|Recipient}
 
 ReceiveIntent Do {I|Recipient} have messages from family?
 ReceiveIntent Hi, {I|Recipient} am {Jane|Recipient} and do I have any messages?

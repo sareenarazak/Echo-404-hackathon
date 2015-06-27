@@ -19,7 +19,7 @@
       ]   
     },
     {
-      "intent" : "SendIntent",
+      "intent" : "SendMessageIntent",
       "slots"  : [
       {
         "name" : "Recipient",
@@ -36,7 +36,7 @@
      ]
     },
    {
-      "intent" : "ReceiveIntent",
+      "intent" : "ReceiveMessageIntent",
       "slots"  : [
       {
         "name" : "Recipient",
