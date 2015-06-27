@@ -26,19 +26,20 @@ var storage = (function () {
     // where the user is leaving a message
     MessengerSession.prototype = {
 
-        doesMemberExist: function(member) {
+        doesMemberExist: function (member) {
             return dynamodb.getItem({
                 TableName: 'usersTable',
                 Key: {
                     userName: {
                         S: member
+                    }
                 }
             });
-        }
+        },
 
         addMember: function (memberName, callback) {
-            if (!doesMemberExist(member)) {
-                
+            if (!this.doesMemberExist(memberName)) {
+
                 // add new member to the users table
                 dynamodb.putItem({
                     TableName: 'usersTable',
@@ -79,21 +80,24 @@ var storage = (function () {
                     },
                     TableName: memberName + 'Messages'
                 };
-                dynamodb.createTable(params, function(err, data) {
-                    if (err) console.log(err, err.stack); // an error occurred
-                    else     callback(true);
-                });                
+                dynamodb.createTable(params, function (err, data) {
+                    if (err) {
+                        console.log(err, err.stack); // an error occurred
+                    } else {
+                        callback(true, data);
+                    }
+                });
             }
             callback(false);
         },
         isMessageSet: function () {
-            return this.data.message != '';
+            return this.data.message !== '';
         },
         isRecipientSet: function () {
-            return this.data.recipient != '';
+            return this.data.recipient !== '';
         },
         isSenderSet: function () {
-            return this.data.sender != '';
+            return this.data.sender !== '';
         },
         getMessages: function (session, callback) {
 
@@ -118,7 +122,7 @@ var storage = (function () {
         // functions have been verified (session has sender, recip, msg)
         saveMessage: function (callback) {
 
-            var recipExist = doesMemberExist(this.data.recipient);
+            var recipExist = this.doesMemberExist(this.data.recipient);
             if (recipExist && recipExist.length) {
 
                 // sender, recipient, message
@@ -126,17 +130,11 @@ var storage = (function () {
 
                 var recipTable = this.data.recipient + 'Messages';
 
-                var newMsg = {
-                    sender: this.data.sender,
-                    time: '',// TODO: get time
-                    message: this.data.message
-                };
-
                 dynamodb.putItem({
                     TableName: recipTable, //TODO: create DB and update with name
                     Item: {
                         time: '', //TODO: get time
-                        sender: this.data.sender,                        
+                        sender: this.data.sender,
                         message: this.data.message
                     }
                 }, function (err, data) {
@@ -144,7 +142,8 @@ var storage = (function () {
                         console.log(err, err.stack);
                     }
                     if (callback) {
-                        callback();
+                        callback(data);
+                    }
                 });
             }
         }
@@ -152,18 +151,20 @@ var storage = (function () {
 
     return {
         hasUsers: function (session, callback) { // done
-
             var scanResults = dynamodb.scan({
                 TableName: 'usersTable'
             });
-            return scanResults && scanResults.length;
 
+            if (callback) {
+                callback(session);
+            }
+            return scanResults && scanResults.length;
         },
         newMessage: function (session) {
             return new MessengerSession(session);
         }
     };
-})();
+}());
 module.exports = storage;
 
 
