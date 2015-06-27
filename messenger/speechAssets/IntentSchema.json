@@ -1,19 +1,33 @@
 {
   "intents": [
     {
-      "intent": "SendIntent",
+      "intent": "AddMemberIntent",
       "slots": [
       {
+        "name" : "Member",
+        "type" : "LITERAL"
+      }
+     ]
+    },
+    {
+      "intent" : "MyNameIntent",
+      "slots"  : [
+      {
+        "name" : "Member",
+        "type" : "LITERAL"
+      }
+      ]   
+    },
+    {
+      "intent" : "SendIntent",
+      "slots"  : [
+      {
         "name" : "Recipient",
-        "type": "LITERAL"
+        "type" : "LITERAL"
       },
       {
         "name" : "Sender",
         "type" : "LITERAL"
-      },
-      {
-        "name" : "Time",
-        "type" : "TIME"
       },
       {
         "name" : "Message",
@@ -22,22 +36,10 @@
      ]
     },
    {
-      "intent": "ReceiveIntent",
-      "slots": [
+      "intent" : "ReceiveIntent",
+      "slots"  : [
       {
         "name" : "Recipient",
-        "type": "LITERAL"
-      },
-      {
-        "name" : "Sender",
-        "type" : "LITERAL"
-      },
-      {
-        "name" : "Time",
-        "type" : "TIME"
-      },
-      {
-        "name" : "Message",
         "type" : "LITERAL"
       }
      ]
