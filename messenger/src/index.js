@@ -2,71 +2,40 @@
 // Copyright (c) 2014-2015 Amazon.com, Inc. or its affiliates. All Rights Reserved. Use is subject to license terms.
 
 /**
- * This simple sample has no external dependencies or session management, and shows the most basic
- * example of how to create a Lambda function for handling Alexa Skill requests.
+ * This sample shows how to create a Lambda function for handling Alexa Skill requests that:
+ *
+ * - Multiple slots: has 2 slots (name and score)
+ * - Database Interaction: demonstrates how to read and write data to DynamoDB.
+ * - NUMBER slot: demonstrates how to handle number slots.
+ * - LITERAL slot: demonstrates literal handling for a finite set of known values
+ * - Dialog and Session state: Handles two models, both a one-shot ask and tell model, and a multi-turn dialog model.
+ *   If the user provides an incorrect slot in a one-shot model, it will direct to the dialog model. See the
+ *   examples section for sample interactions of these models.
  *
  * Examples:
- * One-shot model:
- *  User: "Alexa, tell Greeter to say hello"
- *  Alexa: "Hello World!"
- */
-
-/**
- * App ID for the skill
- */
-var APP_ID = undefined; //replace with "amzn1.echo-sdk-ams.app.[your-unique-value-here]";
-
-/**
- * The AlexaSkill prototype and helper functions
- */
-var AlexaSkill = require('./AlexaSkill');
-
-/**
- * HelloWorld is a child of AlexaSkill.
- * To read more about inheritance in JavaScript, see the link below.
+ * Dialog model:
+ *  User: "Alexa, tell score keeper to reset."
+ *  Alexa: "New game started without players. Who do you want to add first?"
+ *  User: "Add the player Bob"
+ *  Alexa: "Bob has joined your game"
+ *  User: "Add player Jeff"
+ *  Alexa: "Jeff has joined your game"
  *
- * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Introduction_to_Object-Oriented_JavaScript#Inheritance
+ *  (skill saves the new game and ends)
+ *
+ *  User: "Alexa, tell score keeper to give Bob three points."
+ *  Alexa: "Updating your score, three points for Bob"
+ *
+ *  (skill saves the latest score and ends)
+ *
+ * One-shot model:
+ *  User: "Alexa, what's the current score?"
+ *  Alexa: "Jeff has zero points and Bob has three"
  */
-var HelloWorld = function () {
-    AlexaSkill.call(this, APP_ID);
-};
+'use strict';
+var ScoreKeeper = require('./scoreKeeper');
 
-// Extend AlexaSkill
-HelloWorld.prototype = Object.create(AlexaSkill.prototype);
-HelloWorld.prototype.constructor = HelloWorld;
-
-HelloWorld.prototype.eventHandlers.onSessionStarted = function (sessionStartedRequest, session) {
-    console.log("HelloWorld onSessionStarted requestId: " + sessionStartedRequest.requestId
-        + ", sessionId: " + session.sessionId);
-    // any initialization logic goes here
-};
-
-HelloWorld.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {
-    console.log("HelloWorld onLaunch requestId: " + launchRequest.requestId + ", sessionId: " + session.sessionId);
-    var speechOutput = "Welcome to the Alexa Skills Kit, you can say hello";
-    response.ask(speechOutput);
-};
-
-HelloWorld.prototype.eventHandlers.onSessionEnded = function (sessionEndedRequest, session) {
-    console.log("HelloWorld onSessionEnded requestId: " + sessionEndedRequest.requestId
-        + ", sessionId: " + session.sessionId);
-    // any cleanup logic goes here
-};
-
-HelloWorld.prototype.intentHandlers = {
-    // register custom intent handlers
-    HelloWorldIntent: function (intent, session, response) {
-        response.tellWithCard("Hello World!", "Greeter", "Hello World!");
-    },
-    HelpIntent: function (intent, session, response) {
-        response.ask("You can say hello to me!");
-    }
-};
-
-// Create the handler that responds to the Alexa Request.
 exports.handler = function (event, context) {
-    // Create an instance of the HelloWorld skill.
-    var helloWorld = new HelloWorld();
-    helloWorld.execute(event, context);
+    var scoreKeeper = new ScoreKeeper();
+    scoreKeeper.execute(event, context);
 };
-

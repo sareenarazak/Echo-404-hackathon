@@ -32,7 +32,7 @@ AlexaSkill.prototype.eventHandlers = {
     },
 
     /**
-     * Called when the user launches the skill without specifying what they want.
+     * Called when the user invokes the skill without specifying what they want.
      * The subclass must override this function and provide feedback to the user.
      */
     onLaunch: function (launchRequest, session, response) {
