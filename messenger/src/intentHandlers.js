@@ -40,7 +40,7 @@ var registerIntentHandlers = function (intentHandlers) {
     }
 
     intentHandlers.SendMessageIntent = function (intent, session, response) {
-        var recipient = intent.slots.Sender.value;
+        var recipient = intent.slots.userName.value;
         if (!recipient && !session.data.repeatRecipient) {
             response.ask("Sorry, I didn\'t get that. Who would you like to deliver this message to?");
             session.data.repeatRecipient = true;
@@ -62,7 +62,7 @@ var registerIntentHandlers = function (intentHandlers) {
                     } else {
                         response.tell("Please, repeat your message and whom you want to send it.");
                     }
-                }
+                })
             });
             return;
         }
@@ -89,7 +89,7 @@ var registerIntentHandlers = function (intentHandlers) {
                     } else {
                         response.tell("Please, repeat your message and whom you want to send it.");
                     }
-                }
+                })
             });
             return;
         }
