@@ -25,6 +25,30 @@ var storage = (function () {
     // all of this stuff pertains to a specific session
     // where the user is leaving a message
     MessengerSession.prototype = {
+
+        doesMemberExist: function(member) {
+            return dynamodb.getItem({
+                TableName: 'usersTable',
+                Key: {
+                    userName: {
+                        S: member
+                }
+            });
+        }
+
+        addMember: function (memberName, callback) {
+            if (!doesMemberExist(member)) {
+                dynamodb.putItem({
+                    TableName: 'usersTable',
+                    Item: {
+                        'userName': memberName
+                    }
+                });
+
+                callback(true);
+            }
+            callback(false);
+        },
         isMessageSet: function () {
             return this.data.message != '';
         },
@@ -38,20 +62,8 @@ var storage = (function () {
         // this should only be reached/called when the above three 
         // functions have been verified (session has sender, recip, msg)
         saveMessage: function (callback) {
-
-            function doesRecipientExist(recip) {
-                if (recip) {
-                    return dynamodb.getItem({
-                        TableName: 'usersTable',
-                        Key: {
-                            userName: {
-                                S: recip
-                        }
-                    });
-                }
-            }
-
-            var recipExist = doesRecipientExist(this.data.recipient);
+            
+            var recipExist = doesMemberExist(this.data.recipient);
             if (recipExist && recipExist.length) {
 
                 // sender, recipient, message
