@@ -46,45 +46,52 @@ var storage = (function () {
                     Item: {
                         'userName': memberName
                     }
-                });
-
-                // create a messages table for the new member
-                var params = {
-                    AttributeDefinitions: [
-                        {
-                            AttributeName: 'userId',
-                            AttributeType: 'N'
-                        },
-                        {
-                            AttributeName: 'sender',
-                            AttributeType: 'S'
-                        },
-                        {
-                            AttributeName: 'time',
-                            AttributeType: 'N'
-                        },
-                        {
-                            AttributeName: 'message',
-                            AttributeType: 'S'
-                        }
-                    ],
-                    KeySchema: [
-                        {
-                            AttributeName: 'Message ID',
-                            KeyType: 'HASH'
-                        }
-                    ],
-                    ProvisionedThroughput: {
-                        ReadCapacityUnits: 3,
-                        WriteCapacityUnits: 3
-                    },
-                    TableName: memberName + 'Messages'
-                };
-                dynamodb.createTable(params, function (err, data) {
+                }, function (err) {
                     if (err) {
                         console.log(err, err.stack); // an error occurred
                     } else {
-                        callback(true, data);
+                        console.log(memberName);
+
+                        // create a messages table for the new member
+                        var params = {
+                            AttributeDefinitions: [
+                                {
+                                    AttributeName: 'userId',
+                                    AttributeType: 'N'
+                                },
+                                {
+                                    AttributeName: 'sender',
+                                    AttributeType: 'S'
+                                },
+                                {
+                                    AttributeName: 'time',
+                                    AttributeType: 'N'
+                                },
+                                {
+                                    AttributeName: 'message',
+                                    AttributeType: 'S'
+                                }
+                            ],
+                            KeySchema: [
+                                {
+                                    AttributeName: 'Message ID',
+                                    KeyType: 'HASH'
+                                }
+                            ],
+                            ProvisionedThroughput: {
+                                ReadCapacityUnits: 3,
+                                WriteCapacityUnits: 3
+                            },
+                            TableName: memberName + 'Messages'
+                        };
+                        dynamodb.createTable(params, function (err) {
+                            if (err) {
+                                console.log(err, err.stack); // an error occurred
+                            } else {
+                                console.log(memberName);
+                                callback(true);
+                            }
+                        });
                     }
                 });
             }
