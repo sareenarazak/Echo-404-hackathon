@@ -14,7 +14,7 @@ var registerEventHandlers = function (eventHandlers, skillContext) {
     eventHandlers.onLaunch = function (launchRequest, session, response) {
         //Speak welcome message and ask user questions
         //based on whether there are players or not.
-        var empty = storage.isHasUsers();
+        var empty = storage.hasUsers();
         var speechOutput = '',
                 reprompt;
         if(!empty)
