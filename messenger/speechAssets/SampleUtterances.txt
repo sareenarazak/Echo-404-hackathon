@@ -1,9 +1,9 @@
-SendIntent Tell {John|Receipient} to {get a hair cut|Message}
-SendIntent Ask {Jane|Receipient} to {do your homework|Message}
-SendIntent Can you please ask {Jane|Receipient} to {have a life|Message}?
+SendIntent Tell {John|Recipient} to {get a hair cut|Message}
+SendIntent Ask {Jane|Recipient} to {do your homework|Message}
+SendIntent Can you please ask {Jane|Recipient} to {have a life|Message}?
 
-ReceiveIntent Do {I|Receipient} have messages from family?
-ReceiveIntent Hi, {I|Receipient} am {Jane|Receipient} and do I have any messages?
-ReceiveIntent Do {I|Receipient} have messages from {John|Sender}?
-ReceiveIntent Do {Jane|Receipient} have any messages?
-ReceiveIntent Do {Jane|Receipient} have any messages from {John|Sender}?
+ReceiveIntent Do {I|Recipient} have messages from family?
+ReceiveIntent Hi, {I|Recipient} am {Jane|Recipient} and do I have any messages?
+ReceiveIntent Do {I|Recipient} have messages from {John|Sender}?
+ReceiveIntent Do {Jane|Recipient} have any messages?
+ReceiveIntent Do {Jane|Recipient} have any messages from {John|Sender}?
