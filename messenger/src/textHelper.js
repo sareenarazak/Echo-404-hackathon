@@ -9,13 +9,13 @@ var textHelper = (function () {
 
     return {
         completeHelp: 'Here\'s some things you can say,'
-        + ' add john.'
-        + ' give john 5 points.'
-        + ' tell me the score.'
-        + ' new game.'
-        + ' reset.'
+        + ' My name is.'
+        + ' Leave a message for.'
+        + ' Check my messages.'
+        + ' Delete my messages.'
         + ' and exit.',
-        nextHelp: 'You can give a player points, add a player, get the current score, or say help. What would you like?',
+
+        nextHelp: 'You can leave messages for another member. You can also check your messages. What would you like?',
 
         getPlayerName: function (recognizedPlayerName) {
             //do some trick on the recognized player name,
