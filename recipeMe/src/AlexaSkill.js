@@ -33,7 +33,6 @@ AlexaSkill.prototype.eventHandlers = {
      * Subclasses could have overriden this function to open any necessary resources.
      */
     onSessionStarted: function (sessionStartedRequest, session) {
-       
     },
 
     /**
