@@ -33,7 +33,7 @@
  *  Alexa: "Jeff has zero points and Bob has three"
  */
 'use strict';
-var ScoreKeeper = require('./scoreKeeper');
+var Messenger = require('./messenger');
 
 exports.handler = function (event, context) {
     var messenger = new Messenger();
