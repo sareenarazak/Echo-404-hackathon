@@ -27,19 +27,23 @@ var registerIntentHandlers = function (intentHandlers) {
         if (!memberName) {
             response.ask("Sorry, I didn\'t get that. Who would you like to add?");
         } else {
-            storage.loadMessages(session, function (currentMessages) {
-                currentMessages.addMember(memberName, function (success) {
-                    if (success) {
-                        response.tell(memberName + " added successfully to your echo family.");
-                    } else {
-                        response.tell(memberName + " is already a part of your echo family.")
-                    }
-                });
+            session.addMember(memberName, function (success) {
+                if (success) {
+                    response.tell(memberName + " added successfully to your echo family.");
+                } else {
+                    response.tell(memberName + " is already a part of your echo family.")
+                }
             });
         }
     }
 
     intentHandlers.SendMessageIntent = function (intent, session, response) {
+        if (!session.data.userName) {
+            response.ask("Who am I talking to?", "Can you please state your name?");
+        } else {
+            session.data.sender = session.data.userName;
+        }
+
         var recipient = intent.slots.userName.value;
         if (!recipient && !session.data.repeatRecipient) {
             response.ask("Sorry, I didn\'t get that. Who would you like to deliver this message to?");
@@ -53,16 +57,14 @@ var registerIntentHandlers = function (intentHandlers) {
         else if (session.data.repeatRecipient && session.data.message) {
             session.data.repeatRecipient = false;
             session.data.recipient = recipient;
-            storage.loadMessages(session, function (currentMessage) {
-                currentMessage.saveMessage(function (success) {
-                    if(success) {
-                        response.tell("Don't you worry! " + recipient + " will receive your message!");
-                        session.data.recipient = null;
-                        session.data.message = null;
-                    } else {
-                        response.tell("Please, repeat your message and whom you want to send it.");
-                    }
-                })
+            session.saveMessage(function (success) {
+                if(success) {
+                    response.tell("Don't you worry! " + recipient + " will receive your message!");
+                    session.data.recipient = null;
+                    session.data.message = null;
+                } else {
+                    response.tell("Please, repeat your message and whom you want to send it.");
+                }
             });
             return;
         }
@@ -80,16 +82,14 @@ var registerIntentHandlers = function (intentHandlers) {
         else {
             session.data.message = message;
             session.data.recipient = recipient;
-            storage.loadMessages(session, function (currentMessage) {
-                currentMessage.saveMessage(function (success) {
-                    if(success) {
-                        response.tell("Don't you worry! " + recipient + " will receive your message!");
-                        session.data.recipient = null;
-                        session.data.message = null;
-                    } else {
-                        response.tell("Please, repeat your message and whom you want to send it.");
-                    }
-                })
+            session.saveMessage(function (success) {
+                if(success) {
+                    response.tell("Don't you worry! " + recipient + " will receive your message!");
+                    session.data.recipient = null;
+                    session.data.message = null;
+                } else {
+                    response.tell("Please, repeat your message and whom you want to send it.");
+                }
             });
             return;
         }
