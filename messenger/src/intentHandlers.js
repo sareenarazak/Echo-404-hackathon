@@ -40,6 +40,12 @@ var registerIntentHandlers = function (intentHandlers) {
     }
 
     intentHandlers.SendMessageIntent = function (intent, session, response) {
+        if (!session.data.userName) {
+            response.ask("Who am I talking to?", "Can you please state your name?");
+        } else {
+            session.data.sender = session.data.userName;
+        }
+
         var recipient = intent.slots.userName.value;
         if (!recipient && !session.data.repeatRecipient) {
             response.ask("Sorry, I didn\'t get that. Who would you like to deliver this message to?");
