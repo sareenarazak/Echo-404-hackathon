@@ -34,7 +34,6 @@ var registerIntentHandlers = function (intentHandlers) {
                     } else {
                         response.tell(memberName + " is already a part of your echo family.")
                     }
-                    
                 });
             });
         }
@@ -54,15 +53,17 @@ var registerIntentHandlers = function (intentHandlers) {
         else if (session.data.repeatRecipient && session.data.message) {
             session.data.repeatRecipient = false;
             session.data.recipient = recipient;
-            storage.saveMessage(session, function (success) {
-                if(success) {
-                    response.tell("Don't you worry! " + recipient + " will receive your message!");
-                    session.data.recipient = null;
-                    session.data.message = null;
-                } else {
-                    response.tell("Please, repeat your message and whom you want to send it.");
+            storage.loadMessages(session, function (currentMessage) {
+                currentMessage.saveMessage(function (success) {
+                    if(success) {
+                        response.tell("Don't you worry! " + recipient + " will receive your message!");
+                        session.data.recipient = null;
+                        session.data.message = null;
+                    } else {
+                        response.tell("Please, repeat your message and whom you want to send it.");
+                    }
                 }
-            })
+            });
             return;
         }
 
@@ -79,14 +80,15 @@ var registerIntentHandlers = function (intentHandlers) {
         else {
             session.data.message = message;
             session.data.recipient = recipient;
-            storage.saveMessage(session, function (success) {
-                if(success) {
-                    response.tell("Don't you worry! " + recipient + " will receive your message!");
-                    session.data.recipient = null;
-                    session.data.message = null;
-                } else {
-                    response.tell("I can't find " + recipient + " in your echo family. Who is that again?");
-                    session.data.repeatRecipient = true;
+            storage.loadMessages(session, function (currentMessage) {
+                currentMessage.saveMessage(function (success) {
+                    if(success) {
+                        response.tell("Don't you worry! " + recipient + " will receive your message!");
+                        session.data.recipient = null;
+                        session.data.message = null;
+                    } else {
+                        response.tell("Please, repeat your message and whom you want to send it.");
+                    }
                 }
             });
             return;
