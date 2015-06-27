@@ -1,2 +1,6 @@
 # Echo-404-hackathon
-An app to get recipes and read it out step by step
+Messager: 
+
+1.Leave a message 
+2.Listen to a message 
+
