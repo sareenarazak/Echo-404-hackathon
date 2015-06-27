@@ -7,7 +7,7 @@ var storage = (function () {
     var dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
 
     /*
-     * The Game class stores all game states for the user
+     * The MessengerSession class stores all game states for the user
      */
     function MessengerSession(session, data) {
         if (data) {
@@ -17,82 +17,81 @@ var storage = (function () {
                 sender: '',
                 recipient: '',
                 message: ''
-                // players: [],
-                // scores: {}
             };
         }
         this._session = session;
     }
 
+    // all of this stuff pertains to a specific session
+    // where the user is leaving a message
     MessengerSession.prototype = {
         isMessageSet: function () {
-
-            return this.data.message;
-
-            //check if any one had non-zero score,
-            //it can be used as an indication of whether the game has just started
-            // var allEmpty = true;
-            // var gameData = this.data;
-            // gameData.players.forEach(function (player) {
-            //     if (gameData.scores[player] !== 0) {
-            //         allEmpty = false;
-            //     }
-            // });
-            // return allEmpty;
+            return this.data.message != '';
         },
         isRecipientSet: function () {
-
-            return this.data.recipient;
-
+            return this.data.recipient != '';
         },
         isSenderSet: function () {
-
-            return this.data.sender;
-
+            return this.data.sender != '';
         },
 
+        // this should only be reached/called when the above three 
+        // functions have been verified (session has sender, recip, msg)
         saveMessage: function (callback) {
 
-            // sender, recipient, message
-            this._session.attributes.currentMessage = this.data;
+            function doesRecipientExist(recip) {
+                if (recip) {
+                    return dynamodb.getItem({
+                        TableName: 'usersTable',
+                        Key: {
+                            userName: {
+                                S: recip
+                        }
+                    });
+                }
+            }
 
-            // save to DB
-            dynamodb.putItem({
-                TableName: 'table_name', //TODO: create DB and update with name
-                Item: {
-                    receiver: this.data.sender,
-                    time: '', //TODO: get time
-                } // insert ^ where sender = this.data.sender
+            var recipExist = doesRecipientExist(this.data.recipient);
+            if (recipExist && recipExist.length) {
 
-            });
+                // sender, recipient, message
+                this._session.attributes.currentMessage = this.data;
 
+                var recipTable = this.data.recipient + 'Messages';
 
+                var newMsg = {
+                    sender: this.data.sender,
+                    time: '',// TODO: get time
+                    message: this.data.message
+                };
 
-            //save the game states in the session,
-            //so next time we can save a read from dynamoDB
-            // this._session.attributes.currentGame = this.data;
-            // dynamodb.putItem({
-            //     TableName: 'ScoreKeeperUserData',
-            //     Item: {
-            //         CustomerId: {
-            //             S: this._session.user.userId
-            //         },
-            //         Data: {
-            //             S: JSON.stringify(this.data)
-            //         }
-            //     }
-            // }, function (err, data) {
-            //     if (err) {
-            //         console.log(err, err.stack);
-            //     }
-            //     if (callback) {
-            //         callback();
-            //     }
-            // });
+                dynamodb.putItem({
+                    TableName: recipTable, //TODO: create DB and update with name
+                    Item: {
+                        time: '', //TODO: get time
+                        sender: this.data.sender,                        
+                        message: this.data.message
+                    }
+                }, function (err, data) {
+                    if (err) {
+                        console.log(err, err.stack);
+                    }
+                    if (callback) {
+                        callback();
+                });
+            }
         }
     };
 
     return {
+        hasUsers: function (session, callback) { // done
+
+            var scanResults = dynamodb.scan({
+                TableName: 'usersTable'
+            });
+            return scanResults && scanResults.length;
+
+        },
         loadMessages: function (session, callback) {
 
             // if (session.attributes.currentGame) {
