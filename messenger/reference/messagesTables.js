@@ -10,7 +10,7 @@ joeMessages
 In each table, each item will be a message and have the following format:
 
 {
-	id			: <hash value>,
+	id		: <hash value>,
 	sender		: <sender name>,
 	time 		: <time stamp>,
 	message 	: <the message>
