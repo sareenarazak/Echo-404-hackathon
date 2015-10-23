@@ -2,6 +2,13 @@
 // Copyright (c) 2014-2015 Amazon.com, Inc. or its affiliates. All Rights Reserved. Use is subject to license terms.
 'use strict';
 var AWS = require("aws-sdk");
+AWS.config.update({
+    region: 'us-east-1',
+    accessKeyId: '',
+    secretAccessKey: ''
+});
+
+AWS.config.loadFromPath('credentials.json');
 
 var storage = (function () {
     var dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
@@ -22,142 +29,30 @@ var storage = (function () {
         this._session = session;
     }
 
-    // all of this stuff pertains to a specific session
-    // where the user is leaving a message
-    MessengerSession.prototype = {
-
-        doesMemberExist: function (member) {
-            return dynamodb.getItem({
-                TableName: 'usersTable',
-                Key: {
-                    userName: {
-                        S: member
-                    }
-                }
-            });
-        },
-
-        addMember: function (memberName, callback) {
-            if (!this.doesMemberExist(memberName)) {
-
-                // add new member to the users table
-                dynamodb.putItem({
-                    TableName: 'usersTable',
-                    Item: {
-                        'userName': memberName
-                    }
-                }, function (err) {
-                    if (err) {
-                        console.log(err, err.stack); // an error occurred
-                    } else {
-                        console.log(memberName);
-
-                        // create a messages table for the new member
-                        var params = {
-                            AttributeDefinitions: [
-                                {
-                                    AttributeName: 'userId',
-                                    AttributeType: 'N'
-                                },
-                                {
-                                    AttributeName: 'sender',
-                                    AttributeType: 'S'
-                                },
-                                {
-                                    AttributeName: 'time',
-                                    AttributeType: 'N'
-                                },
-                                {
-                                    AttributeName: 'message',
-                                    AttributeType: 'S'
-                                }
-                            ],
-                            KeySchema: [
-                                {
-                                    AttributeName: 'Message ID',
-                                    KeyType: 'HASH'
-                                }
-                            ],
-                            ProvisionedThroughput: {
-                                ReadCapacityUnits: 3,
-                                WriteCapacityUnits: 3
-                            },
-                            TableName: memberName + 'Messages'
-                        };
-                        dynamodb.createTable(params, function (err) {
-                            if (err) {
-                                console.log(err, err.stack); // an error occurred
-                            } else {
-                                console.log(memberName);
-                                callback(true);
-                            }
-                        });
-                    }
-                });
-            }
-            callback(false);
-        },
+     MessengerSession.prototype = {
+        
         isMessageSet: function () {
-            return this.data.message !== '';
+            return self.data.message !== '';
         },
         isRecipientSet: function () {
-            return this.data.recipient !== '';
+            return self.data.recipient !== '';
         },
         isSenderSet: function () {
-            return this.data.sender !== '';
-        },
-        getMessages: function (session, callback) {
-
-            var userTableName = session.data.userName + 'Messages';
-            dynamodb.scan({
-                TableName: userTableName,
-                AttributesToGet: [
-                    'time',
-                    'sender',
-                    'message'
-                ]
-            }, function (err, data) {
-                if (err || data === undefined) {
-                    callback(false);
-                } else {
-                    callback(JSON.parse(data));
-                }
-            });
-        },
-
-        // this should only be reached/called when the above three 
-        // functions have been verified (session has sender, recip, msg)
-        saveMessage: function (callback) {
-
-            var recipExist = this.doesMemberExist(this.data.recipient);
-            if (recipExist && recipExist.length) {
-
-                // sender, recipient, message
-                this._session.attributes.currentMessageSession = this.data;
-
-                var recipTable = this.data.recipient + 'Messages';
-
-                dynamodb.putItem({
-                    TableName: recipTable, //TODO: create DB and update with name
-                    Item: {
-                        time: '', //TODO: get time
-                        sender: this.data.sender,
-                        message: this.data.message
-                    }
-                }, function (err, data) {
-                    if (err) {
-                        console.log(err, err.stack);
-                    }
-                    if (callback) {
-                        callback(data);
-                    }
-                });
-            }
+            return self.data.sender !== '';
         }
     };
 
     return {
-        hasUsers: function (session, callback) { // done
+        logInfo: function (thing) {
+            console.log(thing + " START");
+            for (var v in thing) {
+                console.log("value : " + v);
+            }
+            console.log(thing + " END");
+        },
+
+        hasUsers: function (session, callback) {
+            console.log("we are inside the hasUsers function");
             var scanResults = dynamodb.scan({
                 TableName: 'usersTable'
             });
@@ -167,20 +62,125 @@ var storage = (function () {
             }
             return scanResults && scanResults.length;
         },
-        newMessage: function (session) {
+        hasUser: function (userName, callback) {
+
+            if (!userName) callback(false);
+
+            var self = this;
+            dynamodb.getItem({
+                TableName   : 'FamilyMessages',
+                Key         : {
+                    Recipient   : { 'S' : userName }
+                }
+            }, function (err, data) {
+                if (err) {
+                    console.log("error thrown in the getItem callback of hasUser() -- storage.js");
+                    self.logInfo(err);
+                }
+
+                callback(Number(JSON.stringify(data).length) > 2);
+            });
+        },
+    newMessage: function (session) {
             return new MessengerSession(session);
+        },
+
+        addMember: function (session, memberName, callback) {
+            var self = this;
+            dynamodb.putItem({
+                TableName: 'FamilyMessages',
+                Item: {
+                    'Recipient' : { 'S' : memberName }
+                }
+            }, function (err, data) {
+                if (err) {
+                    console.log("error in the putItem call in addMember of storage.js");
+                    self.logInfo(err);
+                    callback(false);
+                }
+                else {
+                    console.log("Added member '" + memberName + "'");
+                    callback(true);
+                }
+            });
+        },
+
+        getMessages: function (recipient, callback) { // still need to test
+            var self = this;
+            console.log("just got to getMessages of storage.js");
+            dynamodb.getItem({
+                TableName: 'FamilyMessages',
+                AttributesToGet: [
+                    'Messages'
+                ],
+                Key: {
+                    'Recipient': { 'S' : recipient }
+                }
+            }, function (err, data) {
+                if (err) {
+                    console.log("error in the getItem call in getMessages of storage.js");
+                    self.logInfo(err);
+                    callback(undefined);
+                }
+                else if (!data) {
+                    console.log("No messages for member '" + recipient + "'");
+                    callback(null);
+                }
+                else if (data && data.Item && data.Item.Messages && data.Item.Messages.S){
+                    console.log("Retrieved messages for member '" + recipient + "'");
+                    var msgs = [].concat(JSON.parse(data.Item.Messages.S));
+                    callback(msgs);
+                }
+            });
+        },
+
+        saveMessage: function (data, callback) {
+
+            var self = this;
+            var msgs = [];
+            dynamodb.getItem({
+                TableName: 'FamilyMessages',
+                AttributesToGet: [
+                    'Messages'
+                ],
+                Key: {
+                    'Recipient': { 'S' : data.recipient } // TODO: change this back to data.recipient
+                }
+            }, function (err, mmm) {
+                if (err) {
+                    console.log("error in the getItem call in saveMessage of storage.js");
+                    self.logInfo(err);
+                    callback(undefined);
+                }
+                else if (mmm && mmm.Item && mmm.Item.Messages && mmm.Item.Messages.S){
+                    msgs = [].concat(JSON.parse(mmm.Item.Messages.S));
+                }
+                // else it's their first message
+                
+                msgs.push({
+                    'sender'    : data.sender,
+                    'message'   : data.message
+                });
+
+                dynamodb.putItem({
+                    TableName: 'FamilyMessages',
+                    Item: {
+                        'Recipient'     : { 'S' : data.recipient },
+                        'Messages'      : {
+                            'S' : JSON.stringify(msgs)
+                        }
+                    }
+                }, function (err) {
+                    if (err) {
+                        console.log("error in putItem of saveMessage");
+                        self.logInfo(err);
+                    }
+                    if (callback) {
+                        callback();
+                    }
+                });
+            });
         }
     };
 }());
 module.exports = storage;
-
-
-
-
-
-
-
-
-
-
-
