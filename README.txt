@@ -7,16 +7,8 @@ Go to https://developer.amazon.com/appsandservices/solutions/alexa/alexa-skills-
 
 ## Contents
 The included samples represent how to use nodejs AWS Lambda functions as Alexa Skills.
-The following samples are included (ordered by complexity, see the Using Alexa Skills Kit Samples
-link below for more details):
-
-- SpaceGeek : a simple skill that responds to the user with a space fact.
-- MinecraftHelper : a simple skill that responds to the user's recipe queries with formulas.
-- WiseGuy : a skill that tells knock knock jokes.
-- HistoryBuff : a skill that gives historical information that happened on a user provided day.
-- Savvy Consumer : a skill that looks up a category on Amazon and returns the best selling products.
-- TidePooler : a skill that looks up tide information for various cities.
-- ScoreKeeper : a skill that can keep score of a game.
+our App
+messenger - a application to leave and receive messages between family members
 
 ## Usage
 Navigate to the README.txt in each sub directory and follow the instructions for getting the sample up and running.
