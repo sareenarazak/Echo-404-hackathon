@@ -4,5 +4,5 @@ Items have the following format
 
 {
 	id			: <hash value>,
-	userName	: <user name>
+	userName		: <user name>
 }
