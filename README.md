@@ -1,6 +1,3 @@
-# Echo-404-hackathon
-Messager: 
+# Echo-404-Amazon Global Intern Hackathon
 
-1.Leave a message 
-2.Listen to a message 
-
+Amazon messenger Echo App
